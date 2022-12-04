@@ -1,19 +1,23 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class Main {
-    public static void main(String[] args) {
+public class FanoCoder {
+    public static void main(String[] args) throws IOException {
+
         Scanner sc = new Scanner(System.in);
-//        String line1 = sc.nextLine();
-        String line1 = "a b c d e f";
-        String[] letters = line1.split("\\s");
-//        String line2 = sc.nextLine();
-        String line2 = "0.36 0.18 0.18 0.12 0.09 0.07";
-        double[] probs = Arrays.stream(line2.split("\\s")).mapToDouble(Double::parseDouble).toArray();
+        String text = sc.nextLine();
+        String fileName = "input.txt";
+
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName));
+        String[] letters = bufferedReader.readLine().split("\\s");
+        double[] probs = Arrays
+                .stream(bufferedReader.readLine().split("\\s"))
+                .mapToDouble(Double::parseDouble)
+                .toArray();
         int n = letters.length;
         List<Node> nodes = new ArrayList<>();
-
-        String line3 = sc.nextLine();
 
         for (int i = 0; i < n; i++) {
             nodes.add(new Node(letters[i], probs[i], 0, n));
@@ -21,7 +25,8 @@ public class Main {
 
         sortByProbs(n, nodes);
         fano(0, n - 1, nodes);
-        printResult(line3, n, nodes);
+        //printResult(n, nodes);
+        System.out.println(getCode(text, n, nodes));
     }
 
 
@@ -42,15 +47,15 @@ public class Main {
                 total += nodes.get(i).probability;
             }
             group1 = nodes.get(left).probability;
-            diff1 = Math.abs(group1 - total/2);
+            diff1 = Math.abs(group1 - total / 2);
             int board = 1;
             group1 += nodes.get(left + board).probability;
-            double diff2 = Math.abs(group1 - total/2);
+            double diff2 = Math.abs(group1 - total / 2);
             while (diff2 < diff1) {
                 diff1 = diff2;
                 board++;
                 group1 += nodes.get(left + board).probability;
-                diff2 = Math.abs(group1 - total/2);
+                diff2 = Math.abs(group1 - total / 2);
             }
             board--;
             board = board + left;
@@ -95,21 +100,30 @@ public class Main {
         }
     }
 
-    private static void printResult(String text, int n, List<Node> nodes) {
+    private static void printResult(int n, List<Node> nodes) {
         System.out.println("Symbol\tprobability\tcode");
-        Map<String, String> code = new HashMap<>();
         for (int i = 0; i < n; i++) {
             System.out.print(nodes.get(i).symbol + "\t\t" + nodes.get(i).probability + "\t\t");
-            StringBuilder builder = new StringBuilder();
             for (int j = 0; j < nodes.get(i).topPosition; j++) {
-                builder.append(nodes.get(i).code[j]);
                 System.out.print(nodes.get(i).code[j]);
             }
             System.out.println();
-            code.put(nodes.get(i).symbol, builder.toString());
         }
-        for (char ch: text.toCharArray()) {
-            System.out.print(code.get(String.valueOf(ch)));
+    }
+
+    private static String getCode(String text, int n, List<Node> nodes) {
+        Map<String, String> code = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            StringBuilder codeSeq = new StringBuilder();
+            for (int j = 0; j < nodes.get(i).topPosition; j++) {
+                codeSeq.append(nodes.get(i).code[j]);
+            }
+            code.put(nodes.get(i).symbol, codeSeq.toString());
         }
+        StringBuilder output = new StringBuilder();
+        for (char ch : text.toCharArray()) {
+            output.append(code.get(String.valueOf(ch)));
+        }
+        return output.toString();
     }
 }
