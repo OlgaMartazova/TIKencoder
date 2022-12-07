@@ -20,7 +20,7 @@ public class FanoCoder {
         int n = letters.size();
         List<Node> nodes = new ArrayList<>();
         IntStream.range(0, n).forEach(i -> nodes.add(new Node(letters.get(i), probs[i], 0, n)));
-        sortByProbs(n, nodes);
+        sortByProbs(nodes);
         fano(0, n - 1, nodes);
 
         printResult(n, nodes);
@@ -75,34 +75,19 @@ public class FanoCoder {
     }
 
     private static void setCode(int i, int code, List<Node> nodes) {
-        nodes.get(i).code[nodes.get(i).topPosition] = code;
-        nodes.get(i).topPosition += 1;
+        nodes.get(i).code[nodes.get(i).codeLength] = code;
+        nodes.get(i).codeLength += 1;
     }
 
-    private static void sortByProbs(int n, List<Node> nodes) {
-        Node current = new Node();
-        for (Node node : nodes) {
-            for (int i = 0; i < n - 1; i++) {
-                if (nodes.get(i).probability < nodes.get(i + 1).probability) {
-                    //swap
-                    current.probability = nodes.get(i).probability;
-                    current.symbol = nodes.get(i).symbol;
-
-                    nodes.get(i).probability = nodes.get(i + 1).probability;
-                    nodes.get(i).symbol = nodes.get(i + 1).symbol;
-
-                    nodes.get(i + 1).probability = current.probability;
-                    nodes.get(i + 1).symbol = current.symbol;
-                }
-            }
-        }
+    private static void sortByProbs(List<Node> nodes) {
+        nodes.sort(Comparator.comparingDouble(Node::getProbability).reversed());
     }
 
     private static void printResult(int n, List<Node> nodes) {
         System.out.println("Symbol\tprobability\tcode");
         IntStream.range(0, n).forEach(i -> {
             System.out.print(nodes.get(i).symbol + "\t\t" + nodes.get(i).probability + "\t\t");
-            IntStream.range(0, nodes.get(i).topPosition).forEach(j -> System.out.print(nodes.get(i).code[j]));
+            IntStream.range(0, nodes.get(i).codeLength).forEach(j -> System.out.print(nodes.get(i).code[j]));
             System.out.println();
         });
     }
@@ -111,7 +96,7 @@ public class FanoCoder {
         Map<String, String> code = new HashMap<>();
         IntStream.range(0, n).forEach(i -> {
             StringBuilder codeSeq = new StringBuilder();
-            IntStream.range(0, nodes.get(i).topPosition).forEach(j -> codeSeq.append(nodes.get(i).code[j]));
+            IntStream.range(0, nodes.get(i).codeLength).forEach(j -> codeSeq.append(nodes.get(i).code[j]));
             code.put(nodes.get(i).symbol, codeSeq.toString());
         });
         StringBuilder output = new StringBuilder();
